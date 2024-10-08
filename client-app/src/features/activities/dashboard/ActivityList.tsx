@@ -1,16 +1,13 @@
 import { Button, Item, ItemContent, ItemDescription, ItemExtra, ItemGroup, ItemHeader, ItemMeta, Label, Segment } from "semantic-ui-react";
-import { Activity } from "../../../models/activity";
 import { SyntheticEvent, useState } from "react";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../../../app/stores/store";
 
-interface Props {
-    activities : Activity [];
-    selectActivity:(id: string) => void;
-    deleteActivity:(id:string) => void;
-    submitting : boolean
-}
-
-export default function ActivityList({activities, selectActivity, deleteActivity, submitting}: Props) {
-const [target, setTarget] = useState('');
+export default observer(function ActivityList() {
+  const {activityStore} = useStore();
+  const {deleteActivity, activitiesByDate, loading} = activityStore;
+  
+  const [target, setTarget] = useState('');
 
 function handleActivityDelete(e: SyntheticEvent<HTMLButtonElement>, id:string) {
   setTarget(e.currentTarget.name);
@@ -20,7 +17,7 @@ return (
 <Segment>
 <ItemGroup divided>
     {
-        activities.map( activity => (
+        activitiesByDate.map( activity => (
             <Item key={activity.id}>
             <ItemContent>
               <ItemHeader as='a'>{activity.title}</ItemHeader>
@@ -30,9 +27,8 @@ return (
               <div>{activity.city}, {activity.venue}</div>
               </ItemDescription>
               <ItemExtra>
-                <Button  onClick={() => selectActivity(activity.id)} floated='right' content='View' color='blue'></Button>
-                <Button name ={activity.id} 
-                loading={submitting && target === activity.id} 
+                <Button  onClick={() => activityStore.selectActivity(activity.id)} floated='right' content='View' color='blue'></Button>
+                <Button name ={activity.id} loading={loading && target === activity.id} 
                 onClick={(e) => handleActivityDelete(e, activity.id)} floated='right' content='Delete' color='red'></Button>
                 <Label basic content={activity.category}/>
               </ItemExtra>
@@ -42,4 +38,4 @@ return (
     }
 </ItemGroup>
 </Segment>
-)}
+)})
